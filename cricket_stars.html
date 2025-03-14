@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cricket Player Showcase</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        body {
+            background-color: #f0f8ff;
+            color: #333;
+        }
+        
+        header {
+            background-color: #1e3a8a;
+            color: white;
+            text-align: center;
+            padding: 20px 0;
+            margin-bottom: 30px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        h1 {
+            margin-bottom: 10px;
+        }
+        
+        .player-filter {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+        
+        .filter-btn {
+            background-color: #1e3a8a;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 0 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .filter-btn:hover, .filter-btn.active {
+            background-color: #0f1f4d;
+        }
+        
+        .players-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+        
+        .player-card {
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+        
+        .player-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .player-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+        }
+        
+        .player-name {
+            text-align: center;
+            padding: 15px;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        .player-details {
+            background-color: white;
+            border-radius: 10px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            animation: slideIn 0.3s forwards;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .details-header {
+            display: flex;
+            padding: 20px;
+            background-color: #f5f5f5;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .details-image {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 3px solid #1e3a8a;
+        }
+        
+        .details-basic {
+            margin-left: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .details-name {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #1e3a8a;
+        }
+        
+        .details-role {
+            font-size: 1.2rem;
+            color: #555;
+            margin-bottom: 10px;
+        }
+        
+        .details-country {
+            display: flex;
+            align-items: center;
+            font-size: 1rem;
+            color: #666;
+        }
+        
+        .details-stats {
+            padding: 20px;
+        }
+        
+        .stats-title {
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            color: #1e3a8a;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .stat-box {
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #1e3a8a;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .details-bio {
+            padding: 0 20px 20px;
+            line-height: 1.6;
+        }
+        
+        .details-achievements {
+            padding: 0 20px 20px;
+        }
+        
+        .achievement-item {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .achievement-icon {
+            background-color: #1e3a8a;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 10px;
+            font-size: 0.8rem;
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+            transition: color 0.3s;
+        }
+        
+        .close-btn:hover {
+            color: #1e3a8a;
+        }
+        
+        footer {
+            background-color: #1e3a8a;
+            color: white;
+            text-align: center;
+            padding: 20px 0;
+            margin-top: 50px;
+        }
+        
+        @media (max-width: 768px) {
+            .players-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+            
+            .details-header {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+            
+            .details-basic {
+                margin-left: 0;
+                margin-top: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Cricket Stars Showcase</h1>
+            <p>Discover outstanding cricket players and their achievements</p>
+        </div>
+    </header>
+    
+    <main class="container">
+        <div class="player-filter">
+            <button class="filter-btn active" data-filter="all">All Players</button>
+            <button class="filter-btn" data-filter="batsman">Batsmen</button>
+            <button class="filter-btn" data-filter="bowler">Bowlers</button>
+            <button class="filter-btn" data-filter="all-rounder">All-Rounders</button>
+            <button class="filter-btn" data-filter="wicketkeeper">Batsman/Wicketkeepers</button>
+        </div>
+        
+        <div class="players-grid" id="playersGrid">
+            <!-- Player cards will be inserted dynamically by JavaScript -->
+        </div>
+    </main>
+    
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="player-details" id="playerDetails">
+            <button class="close-btn" id="closeBtn">&times;</button>
+            <div class="details-header">
+                <img src="/api/placeholder/150/150" alt="Player" class="details-image" id="detailsImage">
+                <div class="details-basic">
+                    <div class="details-name" id="detailsName">Player Name</div>
+                    <div class="details-role" id="detailsRole">Role</div>
+                    <div class="details-country" id="detailsCountry">Country</div>
+                </div>
+            </div>
+            <div class="details-stats">
+                <h3 class="stats-title">Career Statistics</h3>
+                <div class="stats-grid" id="statsGrid">
+                    <!-- Stats will be inserted dynamically by JavaScript -->
+                </div>
+            </div>
+            <div class="details-bio" id="detailsBio"></div>
+            <div class="details-achievements">
+                <h3 class="stats-title">Key Achievements</h3>
+                <div id="achievementsList">
+                    <!-- Achievements will be inserted dynamically by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Cricket Stars Showcase. All rights reserved.</p>
+        </div>
+    </footer>
+    
+    <script>
+        // Sample player data - replace with your actual player data
+        const players = [
+            {
+                id: 1,
+                name: "Virat Kohli",
+                role: "Batsman",
+                country: "India",
+                image: "images/virat3.jpg",
+                stats: {
+                    matches: 450,
+                    runs: 24000,
+                    average: 53.5,
+                    strikeRate: 92.7,
+                    centuries: 71,
+                    halfCenturies: 125,
+                    sixes: 359,
+                    fours: 2156
+                },
+                bio: "Virat Kohli is widely regarded as one of the greatest batsmen in the history of cricket. Known for his aggressive batting style and exceptional fitness, he has been a cornerstone of the Indian cricket team across all formats.",
+                achievements: [
+                    "ICC Cricketer of the Year (2017, 2018)",
+                    "Fastest to reach 10,000 ODI runs",
+                    "Most double centuries as a captain in Test cricket",
+                    "Most centuries in ODI run chases"
+                ]
+            },
+            {
+                id: 2,
+                name: "Jasprit Bumrah",
+                role: "Bowler",
+                country: "India",
+                image: "images/bumbra1.jpeg",
+                stats: {
+                    matches: 180,
+                    wickets: 350,
+                    economy: 4.5,
+                    average: 22.4,
+                    bestBowling: "6/19",
+                    fiveWicketHauls: 8
+                },
+                bio: "Jasprit Bumrah is considered one of the premier fast bowlers in world cricket. With his unique bowling action and ability to bowl yorkers at will, he has established himself as a key player for India across all formats.",
+                achievements: [
+                    "Fastest Indian to 50 Test wickets",
+                    "First Asian bowler to take 5-wicket hauls in South Africa, England, Australia and West Indies",
+                    "ICC ODI Bowler of the Year (2019)",
+                    "Hat-trick in Test cricket against West Indies"
+                ]
+            },
+            {
+                id: 3,
+                name: "Ben Stokes",
+                role: "All-Rounder",
+                country: "England",
+                image: "images/ben1.jpeg",
+                stats: {
+                    matches: 320,
+                    runs: 10500,
+                    average: 41.2,
+                    wickets: 280,
+                    bowlingAverage: 31.5,
+                    centuries: 24,
+                    sixes: 245,
+                    fours: 950
+                },
+                bio: "Ben Stokes is one of the greatest all-rounders in modern cricket. His ability to change the course of a match with both bat and ball makes him an invaluable player for England. His heroics in the 2019 World Cup final and Headingley Ashes Test are legendary.",
+                achievements: [
+                    "Player of the Match in 2019 World Cup Final",
+                    "Headingley Ashes heroics (135* to win)",
+                    "BBC Sports Personality of the Year (2019)",
+                    "Wisden Cricketer of the Year (2020)"
+                ]
+            },
+            {
+                id: 4,
+                name: "Kane Williamson",
+                role: "Batsman",
+                country: "New Zealand",
+                image: "images/kane1.jpeg",
+                stats: {
+                    matches: 380,
+                    runs: 18500,
+                    average: 49.8,
+                    strikeRate: 82.3,
+                    centuries: 45,
+                    halfCenturies: 95,
+                    sixes: 198,
+                    fours: 1750
+                },
+                bio: "Kane Williamson is regarded as one of the finest batsmen of his generation and one of New Zealand's greatest cricketers. Known for his technical prowess and calm demeanor, he has been a cornerstone of New Zealand cricket.",
+                achievements: [
+                    "ICC Test Player of the Year (2021)",
+                    "Led New Zealand to World Test Championship victory",
+                    "Most Test centuries for New Zealand",
+                    "Player of the Tournament in 2019 World Cup"
+                ]
+            },
+            {
+                id: 5,
+                name: "Rashid Khan",
+                role: "Bowler",
+                country: "Afghanistan",
+                image: "images/rashidh.jpeg",
+                stats: {
+                    matches: 250,
+                    wickets: 420,
+                    economy: 4.2,
+                    average: 18.6,
+                    bestBowling: "7/18",
+                    fiveWicketHauls: 12
+                },
+                bio: "Rashid Khan is one of the most exciting talents in world cricket. As a leg-spin bowler, he has revolutionized the art with his quick arm action and ability to bowl at various speeds without changing his action.",
+                achievements: [
+                    "Fastest to 100 ODI wickets",
+                    "First bowler to take a five-wicket haul in a T20I in his debut as captain",
+                    "ICC T20I Bowler of the Year (multiple years)",
+                    "Most valuable player in various T20 leagues worldwide"
+                ]
+            },
+            {
+                id: 6,
+                name: "Ellyse Perry",
+                role: "All-Rounder",
+                country: "Australia",
+                image: "images/ellyse3.jpeg",
+                stats: {
+                    matches: 290,
+                    runs: 9200,
+                    average: 50.1,
+                    wickets: 310,
+                    bowlingAverage: 24.3,
+                    centuries: 12,
+                    sixes: 110,
+                    fours: 880
+                },
+                bio: "Ellyse Perry is widely regarded as one of the greatest female cricketers of all time. Her ability to excel with both bat and ball has been pivotal to Australia's dominance in women's cricket.",
+                achievements: [
+                    "Multiple Women's World Cup victories",
+                    "First player to complete the double of 1,000 runs and 100 wickets in T20Is",
+                    "ICC Women's Cricketer of the Decade (2011-2020)",
+                    "Youngest Australian to play international cricket (at age 16)"
+                ]
+            },
+
+                        {
+                id: 7,
+                name: "Rohit Sharma",
+                role: "Batsman",
+                country: "India",
+                image: "images/rohith1.jpeg",
+                stats: {
+                    matches: 450,
+                    runs: 18000,
+                    average: 48.2,
+                    strikeRate: 89.5,
+                    highestScore: "264",
+                    centuries: 45,
+                    halfCenturies: 92
+                },
+                bio: "Rohit Sharma, known as the 'Hitman' of Indian cricket, is one of the most prolific opening batsmen. With his elegant stroke play and ability to score big, he has been a match-winner for India across formats.",
+                achievements: [
+                    "Only player to score 3 double centuries in ODIs",
+                    "Highest individual score in ODIs (264)",
+                    "Most centuries in a single World Cup edition (5 in 2019)",
+                    "Captained India to multiple ICC trophies and bilateral series wins"
+                ]
+            },
+
+                        {
+                id: 8,
+                name: "KL Rahul",
+                role: "Wicketkeeper/Batsman",
+                country: "India",
+                image: "images/rahul1.jpeg",
+                stats: {
+                    matches: 250,
+                    runs: 10000,
+                    average: 45.3,
+                    strikeRate: 88.7,
+                    highestScore: "199",
+                    centuries: 20,
+                    halfCenturies: 55,
+                    sixes: 280,
+                    fours: 950,
+                    dismissals: 210
+                },
+                bio: "KL Rahul is one of the most stylish and versatile batsmen in modern cricket. Known for his effortless stroke play and adaptability, he has excelled in all formats of the game and has also taken up the role of a wicketkeeper when required.",
+                achievements: [
+                    "First Indian batsman to score a century on ODI debut",
+                    "Fastest Indian to score a century in T20Is",
+                    "Multiple IPL centuries",
+                    "Vice-captain of the Indian team in various formats"
+                ]
+            },
+
+                    {
+                id: 9,
+                name: "MS Dhoni",
+                role: "Wicketkeeper/Batsman",
+                country: "India",
+                image: "images/dhoni1.jpeg",
+                stats: {
+                    matches: 538,
+                    runs: 17000,
+                    average: 50.6,
+                    strikeRate: 87.6,
+                    highestScore: "183*",
+                    centuries: 16,
+                    halfCenturies: 108,
+                    sixes: 359,
+                    fours : 1486,
+                    dismissals: 829
+                },
+                bio: "MS Dhoni, also known as 'Captain Cool,' is one of the greatest captains and finishers in cricket history. His calm demeanor, sharp cricketing mind, and unmatched finishing ability made him a legend of the game.",
+                achievements: [
+                    "Only captain to win all three ICC white-ball trophies (T20 World Cup 2007, ODI World Cup 2011, Champions Trophy 2013)",
+                    "Most successful Indian captain in limited-overs cricket",
+                    "Highest individual score by a wicketkeeper-batsman in ODIs (183*)",
+                    "Led Chennai Super Kings (CSK) to multiple IPL and Champions League titles"
+                ]
+            },
+
+            {
+                id: 10,
+                name: "Jos Buttler",
+                role: "Wicketkeeper/Batsman",
+                country: "England",
+                image: "images/jos1.jpeg",
+                stats: {
+                    matches: 400,
+                    runs: 13000,
+                    average: 41.8,
+                    strikeRate: 120.5,
+                    highestScore: "162*",
+                    centuries: 15,
+                    halfCenturies: 85,
+                    fours: 1200,
+                    sixes: 400,
+                    dismissals: 550
+                },
+                bio: "Jos Buttler is one of the most explosive wicketkeeper-batsmen in world cricket. Known for his aggressive stroke play and ability to finish games under pressure, he has been a key player for England across all formats.",
+                achievements: [
+                    "Captain of England's T20 World Cup-winning team (2022)",
+                    "Key member of England's 2019 ODI World Cup-winning squad",
+                    "Fastest century by an England batsman in ODIs (46 balls)",
+                    "Multiple IPL centuries and match-winning performances"
+                ]
+            },
+            {
+                id: 11,
+                name: "Dinesh Karthik",
+                role: "Wicketkeeper/Batsman",
+                country: "India",
+                image: "images/dinesh1.jpeg",
+                stats: {
+                    matches: 350,
+                    runs: 7000,
+                    average: 30.2,
+                    strikeRate: 135.4,
+                    highestScore: "97*",
+                    centuries: 1,
+                    halfCenturies: 35,
+                    fours: 650,
+                    sixes: 220,
+                    dismissals: 400
+                },
+                bio: "Dinesh Karthik is a veteran wicketkeeper-batsman known for his finishing skills and adaptability. With a career spanning two decades, he has played crucial roles in multiple formats and is admired for his leadership and commentary insights.",
+                achievements: [
+                    "Played a key role in India's Nidahas Trophy final win (2018) with a last-ball six",
+                    "One of the most experienced Indian wicketkeeper-batsmen",
+                    "Successful IPL finisher with multiple match-winning knocks",
+                    "Transitioned into cricket commentary post-playing career"
+                ]
+            },
+
+            {
+                id: 12,
+                name: "Phil Salt",
+                role: "Wicketkeeper/Batsman",
+                country: "England",
+                image: "images/salt1.jpeg",
+                stats: {
+                    matches: 100,
+                    runs: 3500,
+                    average: 38.5,
+                    strikeRate: 145.2,
+                    highestScore: "137*",
+                    centuries: 5,
+                    halfCenturies: 18,
+                    fours: 420,
+                    sixes: 150,
+                    dismissals: 85
+                },
+                bio: "Phil Salt is an aggressive top-order batsman and wicketkeeper known for his explosive batting in white-ball cricket. With his fearless approach, he has become a key player for England in limited-overs formats and various T20 leagues worldwide.",
+                achievements: [
+                    "Scored a century in his debut ODI series for England",
+                    "Known for his high strike rate in T20 cricket",
+                    "Key player in various franchise T20 leagues",
+                    "One of England’s rising stars in limited-overs cricket"
+                ]
+            },
+
+                    {
+                    id: 13,
+                    name: "Mohammed Siraj",
+                    role: "Bowler",
+                    country: "India",
+                    image: "images/siraj3.jpeg",
+                    stats: {
+                        matches: 150,
+                        wickets: 250,
+                        economy: 4.8,
+                        average: 25.4,
+                        bestBowling: "6/21",
+                        fiveWicketHauls: 5
+                    },
+                    bio: "Mohammed Siraj is one of India's premier fast bowlers known for his ability to swing the ball both ways and generate pace. His relentless aggression and consistency have made him a crucial part of India's bowling attack in all formats.",
+                    achievements: [
+                        "Leading wicket-taker in the ICC World Test Championship 2021-23 Final",
+                        "Bowled a match-winning spell in the Asia Cup 2023 final (6/21)",
+                        "Key bowler in India's Test series win in Australia (2020-21)",
+                        "One of India's fastest bowlers to reach 50 ODI wickets"
+                    ]
+                },
+                    {
+                "id": 14,
+                "name": "Ravindra Jadeja",
+                "role": "All-Rounder",
+                "country": "India",
+                "image": "images/jadu2.jpeg",
+                "stats": {
+                    "matches": 300,
+                    "wickets": 500,
+                    "economy": 4.2,
+                    "average": 24.3,
+                    "bestBowling": "7/42",
+                    "fiveWicketHauls": 12,
+                    "runs": 6000,
+                    "battingAverage": 35.5,
+                    "strikeRate": 85.0,
+                    "highestScore": "175*",
+                    "fours": 550,
+                    "sixes": 150
+                },
+                "bio": "Ravindra Jadeja is one of the best all-rounders in world cricket. His accurate left-arm spin, electric fielding, and aggressive batting make him a vital player for India in all formats.",
+                "achievements": [
+                    "Ranked No. 1 Test all-rounder multiple times",
+                    "Man of the Match in the 2023 WTC Final",
+                    "Only Indian to score 175* and take a five-wicket haul in the same Test",
+                    "Key player in India's 2013 Champions Trophy and 2018 Asia Cup wins"
+                ]
+            },
+
+                        {
+                "id": 15,
+                "name": "Axar Patel",
+                "role": "All-Rounder",
+                "country": "India",
+                "image": "images/axar1.jpeg",
+                "stats": {
+                    "matches": 150,
+                    "wickets": 250,
+                    "economy": 4.1,
+                    "average": 22.8,
+                    "bestBowling": "6/38",
+                    "fiveWicketHauls": 6,
+                    "bowlingAverage": 22.8,
+                    "runs": 3000,
+                    "battingAverage": 32.5,
+                    "strikeRate": 90.2,
+                    "highestScore": "84*",
+                    "centuries": 0,
+                    "fours": 250,
+                    "sixes": 80
+                },
+                "bio": "Axar Patel is a left-arm spinner and handy lower-order batsman known for his accuracy and ability to control the game. He has played crucial roles for India in both Test and limited-overs cricket.",
+                "achievements": [
+                    "Sensational Test debut with 27 wickets in his first 3 matches",
+                    "Part of India's squad in the 2023 ODI World Cup",
+                    "Known for his match-winning performances in the IPL",
+                    "One of the most economical spinners in T20 cricket"
+                ]
+            },
+                {
+                    "id": 16,
+                    "name": "Kuldeep Yadav",
+                    "role": "Bowler",
+                    "country": "India",
+                    "image": "images/kuldeep1.jpeg",
+                    "stats": {
+                        "matches": 200,
+                        "wickets": 350,
+                        "economy": 4.5,
+                        "average": 22.0,
+                        "bestBowling": "6/25",
+                        "fiveWicketHauls": 8,
+                        "hatTricks": 2,
+                        "bowlingAverage": 22.0,
+                        "runs": 1200,
+                        "battingAverage": 15.4,
+                        "strikeRate": 70.5,
+                        "highestScore": "50*",
+                        "centuries": 0,
+                        "fours": 80,
+                        "sixes": 15
+                    },
+                    "bio": "Kuldeep Yadav is a left-arm wrist spinner known for his ability to deceive batsmen with flight and turn. He has been a key spinner for India in all formats, consistently taking crucial wickets.",
+                    "achievements": [
+                        "First Indian bowler to take two hat-tricks in ODIs",
+                        "Fastest Indian spinner to 100 ODI wickets",
+                        "Key player in India's 2018 and 2023 Asia Cup victories",
+                        "Best figures by an Indian spinner in a T20I match"
+                    ]
+                },
+
+                  {
+                    "id": 17,
+                    "name": "Chris Gayle",
+                    "role": "Batsman",
+                    "country": "West Indies",
+                    "image": "images/gayle1.jpeg",
+                    "stats": {
+                        "matches": 450,
+                        "runs": 19000,
+                        average: 38.2,
+                        "strikeRate": 142.8,
+                        "highestScore": "333",
+                        "centuries": 42,
+                        "halfCenturies": 105,
+                        "fours": 2200,
+                        "sixes": 1100
+                    },
+                    "bio": "Chris Gayle, also known as the 'Universe Boss,' is one of the most destructive batsmen in cricket history. His powerful hitting and ability to dominate bowlers make him a legend in all formats, especially in T20 cricket.",
+                    "achievements": [
+                        "First batsman to score a T20I century",
+                        "Holds the record for the highest individual score in T20 cricket (175*)",
+                        "Over 10,000 runs in T20 cricket",
+                        "Fastest century in IPL history (30 balls)"
+                    ]
+                },
+
+                {
+                "id": 18,
+                "name": "AB de Villiers",
+                "role": "Wicketkeeper/Batsman",
+                "country": "South Africa",
+                "image": "images/abd12.jpeg",
+                "stats": {
+                    "matches": 420,
+                    "runs": 20014,
+                    average: 48.3,
+                    "strikeRate": 135.1,
+                    "highestScore": "278*",
+                    "centuries": 47,
+                    "halfCenturies": 109,
+                    "fours": 2200,
+                    "sixes": 950,
+                    "dismissals": 500
+                },
+                "bio": "AB de Villiers, also known as 'Mr. 360', is one of the most innovative and explosive batsmen in cricket history. His ability to play shots all around the ground and adapt to any situation makes him a legend of the game.",
+                "achievements": [
+                    "Holds the record for the fastest ODI century (31 balls)",
+                    "Only batsman to score 900+ ICC ODI rating points in a decade",
+                    "Over 8000 runs in both Tests and ODIs",
+                    "Key player for Royal Challengers Bangalore in IPL history"
+                ]
+            },
+
+            {
+                "id": 19,
+                "name": "Bhuvneshwar Kumar",
+                "role": "Bowler",
+                "country": "India",
+                "image": "images/buvi2.jpeg",
+                "stats": {
+                    "matches": 300,
+                    "wickets": 450,
+                    "economy": 4.3,
+                    "average": 23.8,
+                    "bestBowling": "6/19",
+                    "fiveWicketHauls": 10,
+                    "bowlingAverage": 23.8,
+                    "runs": 1500,
+                    "battingAverage": 18.5,
+                    "strikeRate": 85.0,
+                    "highestScore": "63*",
+                    "centuries": 0,
+                    "fours": 120,
+                    "sixes": 25
+                },
+                "bio": "Bhuvneshwar Kumar is one of India's finest swing bowlers, known for his ability to move the ball both ways and deliver in crucial situations. He has been a key bowler for India in all formats.",
+                "achievements": [
+                    "First Indian bowler to take a five-wicket haul in all formats",
+                    "Holds the record for best bowling figures by an Indian in T20Is (6/19)",
+                    "Purple Cap winner in the IPL (2016, 2017)",
+                    "Instrumental in India's 2013 Champions Trophy victory"
+                ]
+            },
+
+                        {
+                "id": 20,
+                "name": "Hardik Pandya",
+                "role": "All-Rounder",
+                "country": "India",
+                "image": "images/pandya2.jpeg",
+                "stats": {
+                    "matches": 250,
+                    "runs": 5000,
+                    average: 32.5,
+                    "strikeRate": 140.7,
+                    "highestScore": "92*",
+                    "centuries": 1,
+                    "halfCenturies": 25,
+                    "fours": 450,
+                    "sixes": 200,
+                    "wickets": 200,
+                    "economy": 4.9,
+                    "bowlingAverage": 29.5,
+                    "bestBowling": "5/28",
+                    "fiveWicketHauls": 2
+                },
+                "bio": "Hardik Pandya is an explosive all-rounder known for his big hitting and ability to bowl at crucial moments. He has played key roles for India in limited-overs cricket and the IPL.",
+                "achievements": [
+                    "Led Gujarat Titans to their first IPL title as captain",
+                    "One of India's most successful finishers in white-ball cricket",
+                    "Played a crucial role in India's 2018 Asia Cup victory",
+                    "Notable performances in ICC tournaments and IPL"
+                ]
+            }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            
+            
+        ];
+
+        // DOM elements
+        const playersGrid = document.getElementById('playersGrid');
+        const modalOverlay = document.getElementById('modalOverlay');
+        const playerDetails = document.getElementById('playerDetails');
+        const closeBtn = document.getElementById('closeBtn');
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        
+        // Initialize the page
+        function init() {
+            renderPlayerCards();
+            setupEventListeners();
+        }
+        
+                // Render player cards
+        function renderPlayerCards(filter = 'all') {
+            playersGrid.innerHTML = '';
+            
+            const filteredPlayers = filter === 'all' 
+                ? players 
+                : players.filter(player => player.role.toLowerCase().includes(filter));
+            
+            filteredPlayers.forEach(player => {
+                const playerCard = document.createElement('div');
+                playerCard.className = 'player-card';
+                playerCard.dataset.id = player.id;
+                
+                playerCard.innerHTML = `
+                    <img src="${player.image}" alt="${player.name}" class="player-image">
+                    <div class="player-name">${player.name}</div>
+                `;
+                
+                playersGrid.appendChild(playerCard);
+            });
+            
+        }
+        
+        // Setup event listeners
+        function setupEventListeners() {
+            // Player card click
+            playersGrid.addEventListener('click', (e) => {
+                const playerCard = e.target.closest('.player-card');
+                if (playerCard) {
+                    const playerId = parseInt(playerCard.dataset.id);
+                    const player = players.find(p => p.id === playerId);
+                    if (player) {
+                        showPlayerDetails(player);
+                    }
+                }
+            });
+            
+            // Close button click
+            closeBtn.addEventListener('click', () => {
+                modalOverlay.classList.remove('active');
+            });
+            
+            // Click outside the modal
+            modalOverlay.addEventListener('click', (e) => {
+                if (e.target === modalOverlay) {
+                    modalOverlay.classList.remove('active');
+                }
+            });
+            
+            // Filter buttons
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // Update active state
+                    filterBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    // Filter players
+                    const filter = btn.dataset.filter;
+                    renderPlayerCards(filter);
+                });
+            });
+        }
+        
+        // Show player details in modal
+        function showPlayerDetails(player) {
+            // Update details elements
+            document.getElementById('detailsImage').src = player.image;
+            document.getElementById('detailsName').textContent = player.name;
+            document.getElementById('detailsRole').textContent = player.role;
+            document.getElementById('detailsCountry').textContent = player.country;
+            document.getElementById('detailsBio').textContent = player.bio;
+            
+            // Update stats
+            const statsGrid = document.getElementById('statsGrid');
+            statsGrid.innerHTML = '';
+            
+            // Display different stats based on player role
+            if (player.role === 'Batsman') {
+                addStatBox(statsGrid, player.stats.matches, 'Matches');
+                addStatBox(statsGrid, player.stats.runs, 'Runs');
+                addStatBox(statsGrid, player.stats.average, 'Average');
+                addStatBox(statsGrid, player.stats.strikeRate, 'Strike Rate');
+                addStatBox(statsGrid, player.stats.centuries, 'Centuries');
+                addStatBox(statsGrid, player.stats.halfCenturies, 'Half Centuries');
+                addStatBox(statsGrid, player.stats.sixes, 'Sixes');
+                addStatBox(statsGrid, player.stats.fours, 'Fours');
+            } else if (player.role === 'Bowler') {
+                addStatBox(statsGrid, player.stats.matches, 'Matches');
+                addStatBox(statsGrid, player.stats.wickets, 'Wickets');
+                addStatBox(statsGrid, player.stats.economy, 'Economy');
+                addStatBox(statsGrid, player.stats.average, 'Average');
+                addStatBox(statsGrid, player.stats.bestBowling, 'Best Bowling');
+                addStatBox(statsGrid, player.stats.fiveWicketHauls, '5-Wicket Hauls');
+            } else if (player.role === 'All-Rounder') {
+                addStatBox(statsGrid, player.stats.matches, 'Matches');
+                addStatBox(statsGrid, player.stats.runs, 'Runs');
+                addStatBox(statsGrid, player.stats.average, 'Batting Avg');
+                addStatBox(statsGrid, player.stats.wickets, 'Wickets');
+                addStatBox(statsGrid, player.stats.bowlingAverage, 'Bowling Avg');
+                addStatBox(statsGrid, player.stats.centuries, 'Centuries');
+                addStatBox(statsGrid, player.stats.sixes, 'Sixes');
+                addStatBox(statsGrid, player.stats.fours, 'Fours');
+            }
+            if (player.role === 'Wicketkeeper/Batsman') {
+                addStatBox(statsGrid, player.stats.matches, 'Matches');
+                addStatBox(statsGrid, player.stats.runs, 'Runs');
+                addStatBox(statsGrid, player.stats.average, 'Average');
+                addStatBox(statsGrid, player.stats.strikeRate, 'Strike Rate');
+                addStatBox(statsGrid, player.stats.centuries, 'Centuries');
+                addStatBox(statsGrid, player.stats.halfCenturies, 'Half Centuries');
+                addStatBox(statsGrid, player.stats.sixes, 'Sixes');
+                addStatBox(statsGrid, player.stats.fours, 'Fours');
+                addStatBox(statsGrid, player.stats.dismissals, 'Dismissals');
+            }
+            
+            
+            // Update achievements
+            const achievementsList = document.getElementById('achievementsList');
+            achievementsList.innerHTML = '';
+            
+            player.achievements.forEach((achievement, index) => {
+                const achievementItem = document.createElement('div');
+                achievementItem.className = 'achievement-item';
+                
+                achievementItem.innerHTML = `
+                    <div class="achievement-icon">${index + 1}</div>
+                    <div>${achievement}</div>
+                `;
+                
+                achievementsList.appendChild(achievementItem);
+            });
+            
+            // Show modal
+            modalOverlay.classList.add('active');
+        }
+        
+        // Helper to add stat boxes
+        function addStatBox(container, value, label) {
+            const statBox = document.createElement('div');
+            statBox.className = 'stat-box';
+            
+            statBox.innerHTML = `
+                <div class="stat-value">${value}</div>
+                <div class="stat-label">${label}</div>
+            `;
+            
+            container.appendChild(statBox);
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
